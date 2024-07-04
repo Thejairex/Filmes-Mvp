@@ -5,7 +5,12 @@ import json
 
 def main():
     movies = pd.read_csv("Dataset/movies_dataset.csv")
-    transform_movies(movies)
+    credits = pd.read_csv("Dataset/credits.csv")
+    
+    cast = credits[["id", "cast"]]
+    crew = credits[["id", "crew"]]
+    # transform_movies(movies)
+    transform_credits(cast)
 
 
 def normalize_list_column(df, column_name, key: str = "name"):
@@ -119,19 +124,41 @@ def transform_movies(df: pd.DataFrame):
     # Save the cleaned dataset to a new CSV file
     df.to_csv("Dataset/movies_clean.csv", index=False)
 
+def transform_credits(df: pd.DataFrame):
+    # df["cast"] = df["cast"].apply(json.loads)
+    
+    # cast_df = df.explode("cast").reset_index(drop=True)
+    # df = pd.concat([cast_df.drop(['cast'], axis=1), cast_df['cast'].apply(pd.Series)], axis=1)
+    check_info_credits(df)
+    
+
 def check_info(df):
     print(df.info())
     print(df.isna().sum())
     print("Cantidad total de valores faltantes: ", df.isna().sum().sum())
     print("-"*50)
-
+    print(df.duplicated())
+    print(df.duplicated().sum())
     print("Dimensiones: ", df.shape)
-    print(df[["normalized_production_countries", "normalized_production_companies", "normalized_genres", "normalized_spoken_languages"]].head(20))
+    # print(df[["normalized_production_countries", "normalized_production_companies", "normalized_genres", "normalized_spoken_languages"]].head(20))
+
+def check_info_credits(df):
+    print(df.info())
+    print(df.isna().sum())
+    print("Número total de valores faltantes: ", df.isna().sum().sum())
+    print("-"*50)
+    # print(df.duplicated())
+    # print(df.duplicated().sum())
+    print("Dimensiones: ", df.shape)
+    # print(df[0:5])
+    test = df[0:6]
+    test.to_csv("test.csv", index=False)
 
 def check_info_dev(df):
     print(df.info())
-    print(df["production_countries"][0])
+    print(df.head())
     
 if __name__ == "__main__":
     main()
-    # check_info_dev(pd.read_csv("Dataset/movies_dataset.csv"))
+    
+    # check_info_dev(pd.read_csv("Dataset/movies_clean.csv"))
