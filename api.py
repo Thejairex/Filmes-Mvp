@@ -1,8 +1,12 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI
 import pandas as pd
+import datetime
+
 app = FastAPI()
 
 movies = pd.read_csv("Dataset/movies_clean.csv", parse_dates=["release_date"])
+acthors = pd.read_csv("Dataset/credits_clean.csv")
+crew = pd.read_csv("Dataset/crew_clean.csv")
 meses_dict = {
     'enero': 1,
     'febrero': 2,
@@ -17,6 +21,17 @@ meses_dict = {
     'noviembre': 11,
     'diciembre': 12
 }
+dias_dict = {
+    'lunes': 0,
+    'martes': 1,
+    'miercoles': 2,
+    'jueves': 3,
+    'viernes': 4,
+    'sabado': 5,
+    'domingo': 6
+}
+
+print(movies.info())
 
 @app.get("/")
 def index():
@@ -24,16 +39,19 @@ def index():
     return {}
 
 
-@app.get("/filmaciones/{mes}")
+@app.get("/filmaciones/mes/{mes}")
 def cantidad_filmaciones_mes(mes: str):
-    month = movies[movies["release_date"].dt.month == meses_dict[mes.lower()]].to_dict()
-    
-    return f"Cantidad de filmaciones en {mes}: {len(month)}"
+    mes_num = meses_dict[mes.lower().strip()]
+    total = len(movies[movies["release_date"].dt.month == mes_num])
+
+    return f"Cantidad de filmaciones en {mes}: {total}"
 
 
-@app.get("/filmaciones/{dia}")
+@app.get("/filmaciones/dia/{dia}")
 def cantidad_filmaciones_dia(dia):
-    return {"": ""}
+    dia_num = dias_dict[dia.lower().strip()]
+    dia_semana = movies[movies["release_date"].dt.weekday == dia_num]
+    return f'La cantidad de filmaciones en {dia} fue de {len(dia_semana)}.'
 
 
 @app.get("/titulos/{titulo}/score")
@@ -61,10 +79,36 @@ def votos_titulo(titulo):
 
 
 @app.get("/actores/{actor}")
-def nombre_actor (actor):
-    return {"": ""}
+def nombre_actor(actor):
+    actor = actor.title().strip()
+    actor_films = acthors[acthors["name"] == actor]
+    films = movies[movies["id"].isin(actor_films["id_film"])]
+    retorno = films["return"].sum().round(2)
+    retorno_medio = films["return"].mean().round(2)
+    total_film = films.shape[0]
+    return "El actor {} ha ganado un retorno de {}% con un retorno promedio de {}% en {} filmaciones".format(actor, retorno, retorno_medio, total_film)
 
 
-@app.get("/directores/{nombre_director}")
-def get_director(nombre_director):
-    return {"": ""}
+@app.get("/directores/{director}")
+def get_director(director):
+    director = director.title().strip()
+    director_films = crew[(crew["name"] == director) & (crew["job"] == "Director")]
+    films = movies[movies["id"].isin(director_films["id_film"])]
+    retorno = films["return"].sum().round(2)
+    data = {
+        "director": director,
+        "exito": retorno,
+        "filmaciones": [],
+        
+    }
+    for index, row in films.iterrows():
+        film = {
+            "titulo": row["title"],
+            "fecha de lanzamiento": row["release_date"],
+            "puntuacion": row["vote_average"],
+            "costo": row["budget"],
+            "recaudacion" : row["revenue"],
+            "ganacia %" : round(row["return"], 2) ,
+        }
+        data["filmaciones"].append(film)
+    return data
