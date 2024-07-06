@@ -31,8 +31,6 @@ dias_dict = {
     'domingo': 6
 }
 
-print(movies.info())
-
 @app.get("/")
 def index():
 
