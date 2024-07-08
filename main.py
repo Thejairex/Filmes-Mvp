@@ -4,9 +4,9 @@ import datetime
 
 app = FastAPI()
 
-movies = pd.read_csv("Dataset/movies_clean.csv", parse_dates=["release_date"])
-acthors = pd.read_csv("Dataset/credits_clean.csv")
-crew = pd.read_csv("Dataset/crew_clean.csv")
+movies = pd.read_csv("Dataset/Cleaned/movies_clean.csv", parse_dates=["release_date"])
+acthors = pd.read_csv("Dataset/Cleaned/credits_clean.csv")
+crew = pd.read_csv("Dataset/Cleaned/crew_clean.csv")
 meses_dict = {
     'enero': 1,
     'febrero': 2,
