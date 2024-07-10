@@ -80,6 +80,7 @@ def score_title(title):
     """
     Devuelve la puntuacion de una pelicula.
     """
+    title = title.title().strip()
     film = movies[movies["title"] == title]
     score = film["vote_average"].values[0]
     year = film["release_year"].values[0]
@@ -94,6 +95,7 @@ def votes_title(title):
     """
     Devuelve la informacion de los votos de una pelicula.
     """
+    title = title.title().strip()
     film = movies[movies["title"] == title]
     votes = film["vote_count"].values[0]
 
